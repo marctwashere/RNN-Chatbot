@@ -15,34 +15,14 @@ From context clues:
 After conversation reconstruction, avg # messages per conversation is 73.
 Excluding convos with less than 10 messages (spam, grubhut, etc.)
 the avg becomes 170. Max 2135, Min 11, Total 19093. Pretty decent length!
+
+12/2/2021
+I noticed that some emojis are showing up in the text, these will (maybe) be 
+removed in the preprocessing layer for simplicity's sake
 """
 from xml.etree import ElementTree
 
-# USER PARAMS
-debug = False
-
-# load up the texts
-tree = ElementTree.parse('text_messages.xml')
-root = tree.getroot()
-
-# # get some statistics
-# tag_names = {}
-# for child in root:
-#     if child.tag != 'sms':
-#         continue
-
-#     tag = child.get('type')
-#     if tag in tag_names:
-#         tag_names[tag] += 1
-#     else:
-#         tag_names[tag] = 1
-#         print('Found new type of tag! {}'.format(tag))
-    
-#     if tag is None:
-#         print(child.get('body'))
-# print(tag_names)
-
-# function to determine how to format the training dater
+# function to determine how to format the training data
 def text_formatter(single_message, type):
     if type == '1':
         return 'You:\n' + single_message + '\n'
@@ -52,42 +32,38 @@ def text_formatter(single_message, type):
         raise('The SMS message does not have a type of 1 or 2.')
 
 # conversation reconstruction from XML
-convos = {} # each convo is indexed by phone number of correspondent
-for child in root:
+def get_dataset(xml_path):
 
-    # only process SMS texts
-    if child.tag != 'sms':
-        continue
+    # load up the texts
+    tree = ElementTree.parse(xml_path)
+    root = tree.getroot()
 
-    # find this text's phone number
-    phone_num = child.get('address')
-    
-    # get the training data style representation
-    text_to_add = text_formatter(child.get('body'), child.get('type'))
+    convos = {} # each convo is indexed by phone number of correspondent
+    for child in root:
 
-    if phone_num in convos:
-        # append text to the convo
-        convos[phone_num] += text_to_add
-    else:
-        # create new convo entry in the dict
-        convos[phone_num] = text_to_add
-    
-    if debug:
-        print(convos[phone_num])
+        # only process SMS texts
+        if child.tag != 'sms':
+            continue
 
-# get statistics about the convos
-counts = []
-for phone_num, convo in convos.items():
-    num_messages = convo.count(':\n')
-    if num_messages > 10:
-        counts.append(num_messages)
-print(counts)
+        # find this text's phone number
+        phone_num = child.get('address')
+        
+        # get the training data style representation
+        text_to_add = text_formatter(child.get('body'), child.get('type'))
 
-sum = 0
-for count in counts:
-    sum += count
-avg = sum/len(counts)
-print('Total messages including all convos: {}'.format(sum))
-print('Average messages per conversation: {}'.format(avg))
+        if phone_num in convos:
+            # append text to the convo
+            convos[phone_num] += text_to_add
+        else:
+            # create new convo entry in the dict
+            convos[phone_num] = text_to_add
+        
+    # smush the convos together to form one big dataset of continuous text
+    dataset = ''.join(convos.values())
+
+    return dataset
+
+if __name__ == '__main__':
+    dataset = get_dataset('text_messages.xml')
 
 print('debug')
