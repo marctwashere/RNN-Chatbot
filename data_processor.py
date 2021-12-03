@@ -25,9 +25,9 @@ from xml.etree import ElementTree
 # function to determine how to format the training data
 def text_formatter(single_message, type):
     if type == '1':
-        return 'You:\n' + single_message + '\n'
+        return 'You:\n' + single_message + '\n\n'
     elif type == '2':
-        return 'Brian:\n' + single_message + '\n'
+        return 'Brian:\n' + single_message + '\n\n'
     else:
         raise('The SMS message does not have a type of 1 or 2.')
 
@@ -65,5 +65,4 @@ def get_dataset(xml_path):
 
 if __name__ == '__main__':
     dataset = get_dataset('text_messages.xml')
-
-print('debug')
+    print(dataset)
