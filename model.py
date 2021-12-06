@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 # USER PARAMS
-T = 20 # sequence length
+T = 100 # sequence length
 D = 20 # embedding dimensionality
 M = 20 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
@@ -23,6 +23,8 @@ chars_to_ids = keras.layers.StringLookup(vocabulary=list(vocab))
 
 # split dataset from str into individual chars
 dataset_chars = tf.strings.unicode_split(dataset_str, input_encoding='UTF-8')
+
+# chars into ids
 dataset_ids = chars_to_ids(dataset_chars)
 
 # create Dataset object for more efficient handling
@@ -33,19 +35,38 @@ dataset_obj = tf.data.Dataset.from_tensor_slices(dataset_ids)
 # 'hello' -> ('hell','ello')
 sequences = dataset_obj.batch(T+1, drop_remainder=True)
 
-# create training and testing data
-N_train = int(len(sequences)*split_ratio) # number of training samples
-N_test = len(sequences) - N_train # number of test samples
-X_train = np.empty((N_train, T))
-Y_train = np.empty((N_train, T))
-X_test = np.empty((N_test, T))
-Y_test = np.empty((N_test, T))
+# map each sequence to an input and target pair
+def seq_splitter(seq):
+    input = seq[:-1]
+    target = seq[1:]
+    return input, target
+dataset_obj = sequences.map(seq_splitter)
 
-for i in range(N_train):
-    pass
+# create model with by subclassing keras.Model
+class TextGen(keras.Model):
+
+    def __init__(self, vocab_size, embed_dim, hidden_dim):
+        super(TextGen, self).__init__()
+        self.embed = keras.layers.Embedding(vocab_size, embed_dim)
+        self.lstm = keras.layers.LSTM(hidden_dim, activation='relu', return_sequences=True)
+        self.dense = keras.layers.Dense(vocab_size, activation='softmax')
+    
+    def call(self, inputs, state=None, return_state=False):
+        x = self.embed(inputs)
+
+        # we need to be able to set state for text generation
+        if state is None:
+            x, state = self.lstm(x)
+        else:
+            x, state = self.lstm(x, initial_state=state)
+        x = self.dense(x)
+
+        # again, text gen needs state for next pass
+        if return_state:
+            return x, state
+        else:
+            return x
+    
+    
 
 
-# create the model
-input = keras.layers.Embedding(V, D)
-x = keras.layers.LSTM(M, activation='relu', return_sequences=True)(input)
-output = keras.layers.Dense(V, activation='softmax')(x)
