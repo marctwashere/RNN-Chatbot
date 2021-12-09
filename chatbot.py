@@ -5,6 +5,12 @@ import tensorflow as tf
 import math
 import numpy as np
 
+# seed the bois
+def seed_everything(seed):
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+seed_everything(42)
+
 # convert xml to script-like dataset
 dataset_str = get_dataset('text_messages.xml')
 
@@ -69,6 +75,8 @@ def gen_text(model, state, stop_count=500, stop_str='You:\n'):
 if __name__ == '__main__':
 
     # load up the model
+    # code broke with load_model(), would only accept RNN sequences of the length i trained on
+    # using load_weights() instead
     model = ChatModel(len(vocab), 20, 20)
     model.load_weights('current_model/ChatModel')
 

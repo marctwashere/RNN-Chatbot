@@ -1,4 +1,8 @@
 import tensorflow.keras as keras
+import tensorflow as tf
+
+# not sure if this makes a difference here, but weight init uses random so im putting it
+tf.random.set_seed(42)
 
 # create model with by subclassing keras.Model
 class ChatModel(keras.Model):

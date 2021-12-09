@@ -6,19 +6,27 @@ import numpy as np
 
 # USER PARAMS
 T = 100 # sequence length
-D = 20 # embedding dimensionality
-M = 20 # hidden layer dimensionality
+D = 256 # embedding dimensionality
+M = 1024 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
 batch_size = 64
+num_epochs = 30
+
+# seed the bois
+def seed_everything(seed):
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+seed_everything(42)
 
 # convert xml to script-like dataset
+print('Building the dataset from XML file...')
 dataset_str = get_dataset('text_messages.xml')
 
 # TODO get rid of emojis or leave in?
 
 # create the vocab by finding unique chars
 vocab = sorted(set(dataset_str))
-print('Vocab (V): {}'.format(len(vocab)))
+print('Vocab size (V): {}'.format(len(vocab)))
 
 # converts from textual character to an id that can be passed to embedding layer
 chars_to_ids = keras.layers.StringLookup(vocabulary=list(vocab))
@@ -55,8 +63,16 @@ dataset_obj = (
 # use custom subclassed Model
 model = ChatModel(len(vocab), D, M)
 
-for x, y in dataset_obj.take(1):
-    test = model(x)
+# add loss and optimizer
+loss = keras.losses.SparseCategoricalCrossentropy(from_logits=True) # i removed soft-max so we are using logits now
+opt = keras.optimizers.Adam(learning_rate=1e-7)
+model.compile(optimizer=opt, loss=loss)
+
+# save every epochs for empirical progress tests
+chkpt = keras.callbacks.ModelCheckpoint('models/epoch{epoch}', save_freq='epoch', save_weights_only=True)
+
+# train that bad boy
+model.fit(dataset_obj, epochs=num_epochs, callbacks=[chkpt])
 
 print('debug')
 
