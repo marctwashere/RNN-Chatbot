@@ -10,7 +10,7 @@ class ChatModel(keras.Model):
     def __init__(self, vocab_size, embed_dim, hidden_dim):
         super(ChatModel, self).__init__()
         self.embed = keras.layers.Embedding(vocab_size, embed_dim)
-        self.gru = keras.layers.GRU(hidden_dim, activation='relu', return_sequences=True, return_state=True)
+        self.gru = keras.layers.GRU(hidden_dim, return_sequences=True, return_state=True)
         self.dense = keras.layers.Dense(vocab_size)
     
     def call(self, inputs, state=None, return_state=False):

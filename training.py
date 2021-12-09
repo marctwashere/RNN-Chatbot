@@ -1,3 +1,8 @@
+"""
+12/9/21
+My loss kept exploding to nan. Even lowered the LR way down. Read online that this can be
+due to ReLu instead of tanh, so I will switch and raise the LR some!
+"""
 from data_processor import get_dataset
 from model import ChatModel
 import tensorflow.keras as keras
@@ -11,6 +16,7 @@ M = 1024 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
 batch_size = 64
 num_epochs = 30
+lr = 1e-4
 
 # seed the bois
 def seed_everything(seed):
@@ -65,7 +71,7 @@ model = ChatModel(len(vocab), D, M)
 
 # add loss and optimizer
 loss = keras.losses.SparseCategoricalCrossentropy(from_logits=True) # i removed soft-max so we are using logits now
-opt = keras.optimizers.Adam(learning_rate=1e-7)
+opt = keras.optimizers.Adam(learning_rate=lr)
 model.compile(optimizer=opt, loss=loss)
 
 # save every epochs for empirical progress tests
