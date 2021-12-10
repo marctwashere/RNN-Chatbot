@@ -2,6 +2,17 @@
 12/9/21
 My loss kept exploding to nan. Even lowered the LR way down. Read online that this can be
 due to ReLu instead of tanh, so I will switch and raise the LR some!
+
+12/10/21
+The loss decreases quite nicel with tanh but still explodes within the first epoch. Seems like a
+particular input is messing things up. I'm going to do some code step through of the 
+tensorflow library to try to find the input culprit.
+
+With seed 42, the culprit batch is #143 in epoch #1. Tried training on dataset from batches 0 to 142
+and this helped some but still exploded on the third epoch. At least I know now that the
+problem is not nan values in the input (because it made it through 2 epochs)
+
+
 """
 from data_processor import get_dataset
 from model import ChatModel
@@ -14,7 +25,7 @@ T = 100 # sequence length
 D = 256 # embedding dimensionality
 M = 1024 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
-batch_size = 64
+batch_size = 200
 num_epochs = 30
 lr = 1e-4
 
@@ -78,7 +89,7 @@ model.compile(optimizer=opt, loss=loss)
 chkpt = keras.callbacks.ModelCheckpoint('models/epoch{epoch}', save_freq='epoch', save_weights_only=True)
 
 # train that bad boy
-model.fit(dataset_obj, epochs=num_epochs, callbacks=[chkpt])
+model.fit(dataset_obj.take(142), epochs=num_epochs, callbacks=[chkpt])
 
 print('debug')
 
