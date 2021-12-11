@@ -12,7 +12,7 @@ class ChatModel(keras.Model):
         self.embed = keras.layers.Embedding(vocab_size, embed_dim)
         self.gru = keras.layers.GRU(hidden_dim, return_sequences=True, return_state=True)
         self.dense = keras.layers.Dense(vocab_size)
-        self.epsilon = 20
+        # self.epsilon = 20
     
     def call(self, inputs, state=None, return_state=False):
         x = self.embed(inputs)
@@ -25,9 +25,9 @@ class ChatModel(keras.Model):
         
         x = self.dense(x)
 
-        # trying to take some advice for preventinng divergence
-        x = tf.abs(x)
-        x = tf.add(x, self.epsilon)
+        # # trying to take some advice for preventinng divergence
+        # x = tf.abs(x)
+        # x = tf.add(x, self.epsilon)
 
         # again, text gen needs state for next pass
         if return_state:

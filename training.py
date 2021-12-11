@@ -13,7 +13,13 @@ and this helped some but still exploded on the third epoch. At least I know now 
 problem is not nan values in the input (because it made it through 2 epochs)
 
 When I forced GPU execution to be off, (CPU only) I received an InvalidArgumentError from the Embed
-Layer complaining that the index 210 was looked up but vocab only spans from indexes 0-209
+Layer complaining that the index 210 was looked up but vocab only spans from indexes 0-209. Not sure
+why this was the only time an exception was raised instead of just continuing with NaN like
+the GPU runs did.
+
+Exception has occurred: InvalidArgumentError       (note: full exception trace is shown but execution is paused at: _run_module_as_main)
+ indices[47,99] = 210 is not in [0, 210)
+	 [[node chat_model/embedding/embedding_lookup (model.py:18) ]] [Op:__inference_train_function_2103]
 
 12/11/21
 So np.count_nonzero(dataset_ids>=210) shows that only ONE id in the whole dataset is >= 210.
@@ -103,23 +109,6 @@ model.compile(optimizer=opt, loss=loss)
 
 # save every epochs for empirical progress tests
 chkpt = keras.callbacks.ModelCheckpoint('models/epoch{epoch}', save_freq='epoch', save_weights_only=True)
-
-# # converts from ids from model's output back into characters
-ids_to_chars = keras.layers.StringLookup(vocabulary=list(vocab), invert=True)
-
-import time
-i = 0
-for pair in dataset_obj:
-    i += 1
-    if np.count_nonzero(pair[0]==210) >=1:
-        print('oops0')
-    elif np.count_nonzero(pair[1]==210) >= 1:
-        print('oops1')
-    # if i == 144:
-    #     for j in pair[0].numpy().flatten():
-    #         print(j)
-    #         time.sleep(0.05)
-        
 
 # train that bad boy
 model.fit(dataset_obj, epochs=num_epochs, callbacks=[chkpt])
