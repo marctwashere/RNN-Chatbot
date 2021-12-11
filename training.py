@@ -15,10 +15,21 @@ problem is not nan values in the input (because it made it through 2 epochs)
 When I forced GPU execution to be off, (CPU only) I received an InvalidArgumentError from the Embed
 Layer complaining that the index 210 was looked up but vocab only spans from indexes 0-209
 
+12/11/21
+So np.count_nonzero(dataset_ids>=210) shows that only ONE id in the whole dataset is >= 210.
+Seems like model.fit() does some batch shuffling of its own becaue looping through dataset_obj
+shows that the guilty pair is #158. It contains 210
+
+FOUND THE FREAKING BUG. So when I create the embedding layer in model.py, I pass in len(vocab) which is
+210. However, that layer's constructor needs the max index (210) + 1 = 211. This is because the UNK token
+which is not considered in len(vocab) also has an embed at index 0. It was only breaking on one training
+batch because the lower indexes are emojis and the particular emoji '🧧' only shows up one time in the
+entire dataset (idx 717401), which is why the training went to Nan so randomly. Just adjusting the embed 
+csonstructor by adding 1 to inpud_dim.
+
+Upon testing, I confirm that the bug is fixed!!!!!!!
 
 """
-import os
-os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 from data_processor import get_dataset
 from model import ChatModel
 import tensorflow.keras as keras
@@ -83,7 +94,7 @@ dataset_obj = (
 )
 
 # use custom subclassed Model
-model = ChatModel(len(vocab), D, M)
+model = ChatModel(len(vocab)+1, D, M) # +1 to account for UNK token
 
 # add loss and optimizer
 loss = keras.losses.SparseCategoricalCrossentropy(from_logits=True) # i removed soft-max so we are using logits now
@@ -94,16 +105,20 @@ model.compile(optimizer=opt, loss=loss)
 chkpt = keras.callbacks.ModelCheckpoint('models/epoch{epoch}', save_freq='epoch', save_weights_only=True)
 
 # # converts from ids from model's output back into characters
-# ids_to_chars = keras.layers.StringLookup(vocabulary=list(vocab), invert=True)
+ids_to_chars = keras.layers.StringLookup(vocabulary=list(vocab), invert=True)
 
-# import time
-# i = 0
-# for pair in dataset_obj.take(144):
-#     i += 1
-#     if i == 144:
-#         for j in pair[0].numpy().flatten():
-#             print(j)
-#             time.sleep(0.05)
+import time
+i = 0
+for pair in dataset_obj:
+    i += 1
+    if np.count_nonzero(pair[0]==210) >=1:
+        print('oops0')
+    elif np.count_nonzero(pair[1]==210) >= 1:
+        print('oops1')
+    # if i == 144:
+    #     for j in pair[0].numpy().flatten():
+    #         print(j)
+    #         time.sleep(0.05)
         
 
 # train that bad boy

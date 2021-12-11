@@ -77,7 +77,7 @@ if __name__ == '__main__':
     # load up the model
     # code broke with load_model(), would only accept RNN sequences of the length i trained on
     # using load_weights() instead
-    model = ChatModel(len(vocab), 256, 1024)
+    model = ChatModel(len(vocab)+1, 256, 1024) # +1 to account for UNK token
     model.load_weights('models/epoch2')
 
     # display instructions
