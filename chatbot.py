@@ -9,7 +9,7 @@ import numpy as np
 def seed_everything(seed):
     np.random.seed(seed)
     tf.random.set_seed(seed)
-seed_everything(42)
+# seed_everything(42)
 
 # convert xml to script-like dataset
 dataset_str = get_dataset('text_messages.xml')
@@ -42,6 +42,7 @@ def gen_text(model, state, stop_count=500, stop_str='You:\n'):
     text = '' # models outputted text goes here
 
     # prime model with '\n'
+    text += '\n'
     ids = chars_to_ids(['\n'])
     ids = np.reshape(ids, (1, -1))
 
@@ -70,15 +71,17 @@ def gen_text(model, state, stop_count=500, stop_str='You:\n'):
         ids = np.reshape(ids, (1, -1))
         count += 1
     
-    return text
+    return text, state
 
 if __name__ == '__main__':
-
+    # prompt user for which model they want
+    model_num = input('Which chat model # are you using: ')
+    
     # load up the model
     # code broke with load_model(), would only accept RNN sequences of the length i trained on
     # using load_weights() instead
     model = ChatModel(len(vocab)+1, 256, 1024) # +1 to account for UNK token
-    model.load_weights('models/epoch2')
+    model.load_weights('models/epoch'+model_num)
 
     # display instructions
     print("""
@@ -97,13 +100,13 @@ Press enter to send your response.
         state = send_text(model, user_resp, state=state)
 
         # generate model's response
-        model_resp = gen_text(model, state)
+        model_resp, state = gen_text(model, state)
 
         # display for the user
-        print(model_resp)
+        print(model_resp, end='')
 
         # get the next user input
-        user_resp = input('') # no + '\n' becaues gen_text func uses it to prime the resp
+        user_resp = input('') + '\n' # model excepts it and it is not captured automatically from console
 
 
 

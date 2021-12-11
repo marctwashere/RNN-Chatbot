@@ -48,7 +48,7 @@ D = 256 # embedding dimensionality
 M = 1024 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
 batch_size = 64
-num_epochs = 30
+num_epochs = 100
 lr = 1e-4
 
 # seed the bois
