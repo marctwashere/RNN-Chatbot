@@ -8,12 +8,17 @@ The loss decreases quite nicel with tanh but still explodes within the first epo
 particular input is messing things up. I'm going to do some code step through of the 
 tensorflow library to try to find the input culprit.
 
-With seed 42, the culprit batch is #143 in epoch #1. Tried training on dataset from batches 0 to 142
+With seed 42, the culprit batch is #144 in epoch #1. Tried training on dataset from batches 0 to 142
 and this helped some but still exploded on the third epoch. At least I know now that the
 problem is not nan values in the input (because it made it through 2 epochs)
 
+When I forced GPU execution to be off, (CPU only) I received an InvalidArgumentError from the Embed
+Layer complaining that the index 210 was looked up but vocab only spans from indexes 0-209
+
 
 """
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 from data_processor import get_dataset
 from model import ChatModel
 import tensorflow.keras as keras
@@ -25,7 +30,7 @@ T = 100 # sequence length
 D = 256 # embedding dimensionality
 M = 1024 # hidden layer dimensionality
 split_ratio = 0.75 # train/test split ratio
-batch_size = 200
+batch_size = 64
 num_epochs = 30
 lr = 1e-4
 
@@ -88,8 +93,21 @@ model.compile(optimizer=opt, loss=loss)
 # save every epochs for empirical progress tests
 chkpt = keras.callbacks.ModelCheckpoint('models/epoch{epoch}', save_freq='epoch', save_weights_only=True)
 
+# # converts from ids from model's output back into characters
+# ids_to_chars = keras.layers.StringLookup(vocabulary=list(vocab), invert=True)
+
+# import time
+# i = 0
+# for pair in dataset_obj.take(144):
+#     i += 1
+#     if i == 144:
+#         for j in pair[0].numpy().flatten():
+#             print(j)
+#             time.sleep(0.05)
+        
+
 # train that bad boy
-model.fit(dataset_obj.take(142), epochs=num_epochs, callbacks=[chkpt])
+model.fit(dataset_obj, epochs=num_epochs, callbacks=[chkpt])
 
 print('debug')
 

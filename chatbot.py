@@ -77,8 +77,8 @@ if __name__ == '__main__':
     # load up the model
     # code broke with load_model(), would only accept RNN sequences of the length i trained on
     # using load_weights() instead
-    model = ChatModel(len(vocab), 20, 20)
-    model.load_weights('current_model/ChatModel')
+    model = ChatModel(len(vocab), 256, 1024)
+    model.load_weights('models/epoch2')
 
     # display instructions
     print("""
