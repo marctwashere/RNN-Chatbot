@@ -2,13 +2,38 @@
 A text-generation model and chatbot interface to talk to it
 
 ## The Idea
-
+A couple weeks before I created this repo, my friend Brian sent me an XML export of his entire text message history. Since I do machine learning work, he asked me to make a chatbot of him using the text messages.
 
 ## Raw Data
+My friend sent me an XML file `text_messages.xml` which contains all SMS and MMS messages sent from and received by his phone. For more information on the export tool, here are some info lines from the file:
+```
+<!--File Created By SMS Backup & Restore v10.15.002 on 17/11/2021 00:49:45-->
+<!--To view this file in a more readable format, visit https://synctech.com.au/view-backup/-->
+```
 
 ## Transformed Data
+I made [data_processor.py](data_processor.py) which converts the XML into a script-like representation of the data:
+```
+You:
+[some text message]
+
+Brian:
+[Brian's response]
+
+You:
+[another response]
+
+You:
+[a double-text]
+```
+
+All of the original text conversations are reconstructed as shown above. Then all conversations are concatenated together. Note that 'You' is written literally and does not get replaced with any contact name.
 
 ## The Model
+For simplicity's sake, I opted not to use the more performant transformer model. I [implemented my model](model.py) by subclassing keras.Model. It contains the following:
+- an **embedding layer** for conversion from text to computer-readable vectors
+- a **gru (gated recurrent unit)** for modeling the text sequences
+- a **dense layer** for outputting a log-probability distribution for the 'next character' in the sequence
 
 ## Training
 
@@ -109,7 +134,7 @@ Brian:
 We are schedule looking for Christ, may again tomorrow
 ```
 
-And one other cool thing I wanted to note. While I was probing around the model's space of understanding, I found that it can generate links! I visited maybe 5 but none of the links led to actual webpages (although some sites were real).
+And one other cool thing I wanted to note. While I was probing around the model's space of understanding, I found that it can generate links! I visited maybe 5 but none of the links led to actual webpages (although some domains were real).
 ```
 You:
 can you send me a link to the video
