@@ -60,7 +60,7 @@ Brian:
 Gut id on that was week you! Watch are you 😂
 ```
 
-Since the original dataset has a lot of messages setting up meetings/hangouts, I figured I would ask the model `do you want to hang out tonight?`. The response lacks some intelligence, but clearly contains aspects of an appropriate response to this specific question:
+Since the original dataset has a lot of messages setting up meetings/hangouts, I figured I would ask the model `do you want to hang out tonight?`. The response lacks some intelligence, but contains aspects of an appropriate response to this specific question:
 - `How sure you know you hike're cleake come?`  maybe a 'sure' or asking about 'hiking'
 - `at the shorres at N: Pron’s good` appears to be a location confirmation
 - `Dishover Saturday 39 histo/it'l try mis-tomalre!?` a proposed date and the number could possibly be a time/address
@@ -73,5 +73,98 @@ How sure you know you hike're cleake come? Sure, at the shorres at N: Pron’s g
 ```
 
 ### 50 Epochs
+At this point, the responses seem much more pertinent and coherent to me. I asked the model `how do you like california` and came the sarcastic reply `thanks like we're raining` and some other bits about things being `nice` and `am good`.
+```
+You:
+how do you like california
+
+Brian:
+Thanks like we're raining?
+
+Brian:
+Yeah probably nice, but contacts you can get lunch
+
+Brian:
+Yep, I interned am good
+```
+
+And I asked the model three times in a row `what is the meaning of life`. Funnily, one of the answers was `looking for Christ, may again tomorrow`.
+```
+You:
+what is the meaning of life 
+
+Brian:
+I see, what Vary, sorry do you know Thanksgiving next week
+
+You:
+what is the meaning of life
+
+Brian:
+Haha thinking or tomorrow is thinking another tho 😂
+
+You:
+what is the meaning of life
+
+Brian:
+We are schedule looking for Christ, may again tomorrow
+```
+
+And one other cool thing I wanted to note. While I was probing around the model's space of understanding, I found that it can generate links! I visited maybe 5 but none of the links led to actual webpages (although some sites were real).
+```
+You:
+can you send me a link to the video
+
+Brian:
+https://youtu.be/WviDOCcldyUHK108eh
+```
+
+This is also the epoch where the model learned how to use the f-word in many places. I omitted these examples to keep the README clean haha!
+
+### Epoch 85
+So after 85 epochs of training, I can somewhat carry on a conversation with the model that spans multiple back-and-forth messages.
+
+```
+You:
+hey are you free tomorrow morning
+
+Brian:
+The semester, I know times are you? Did you velie would you still get our friendly cheaper and it was nice
+
+Brian:
+Haha, that's pretty cool
+
+You:
+I am free after 8
+
+Brian:
+Ay you are about that
+
+Brian:
+Hi Gom are you going to relax and Yeah we just come in any here
+
+You:
+yes lets relax! maybe watch a show or some youtube
+
+Brian:
+Same are you going to be down
+
+You:
+im definitely down
+
+Brian:
+What time are you ub?
+
+Brian:
+You're welcome to meet high????
+
+You:
+No brian we are not meeting high
+
+Brian:
+Oh I was wondering with camera =amment is sure what's yourself lol
+```
+
+### 100 Epochs
+Here I was starting to notice some overfitting. The model began to "ignore' whatever messages I sent it and spit out mostly manufactured, generic responses. (I'm not including the snippets because the dataset is private.)
 
 ## Acknowledgments
