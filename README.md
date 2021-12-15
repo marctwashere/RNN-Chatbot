@@ -2,10 +2,10 @@
 A text-generation model and chatbot interface to talk to it
 
 ## The Idea
-A couple weeks before I created this repo, my friend Brian sent me an XML export of his entire text message history. Since I do machine learning work, he asked me to make a chatbot of him using the text messages.
+A couple weeks before I created this repo, my friend Brian sent me an XML export of his entire text message history. Since I do machine learning work, he asked me to make a chatbot of him trained on his text messages.
 
 ## Raw Data
-My friend sent me an XML file `text_messages.xml` which contains all SMS and MMS messages sent from and received by his phone. For more information on the export tool, here are some info lines from the file:
+My friend sent me an XML file `text_messages.xml` which contains all SMS and MMS messages sent from and received by his phone. I have not included this file in the repo for privacy reasons, but you if you create your own it should work with all the python scripts. For more information on the export tool used to create the XML, here are some info lines from the file:
 ```
 <!--File Created By SMS Backup & Restore v10.15.002 on 17/11/2021 00:49:45-->
 <!--To view this file in a more readable format, visit https://synctech.com.au/view-backup/-->
@@ -30,14 +30,15 @@ You:
 All of the original text conversations are reconstructed as shown above. Then all conversations are concatenated together. Note that 'You' is written literally and does not get replaced with any contact name.
 
 ## The Model
-For simplicity's sake, I opted not to use the more performant transformer model. I [implemented my model](model.py) by subclassing keras.Model. It contains the following:
+For simplicity's sake, I opted not to use the more performant 'transformer' model. I [implemented my model](model.py) by subclassing keras.Model. It contains the following:
 - an **embedding layer** for conversion from text to computer-readable vectors
-- a **gru (gated recurrent unit)** for modeling the text sequences
+- a **gru (gated recurrent unit layer)** for modeling the text sequences
 - a **dense layer** for outputting a log-probability distribution for the 'next character' in the sequence
 
 ## Training
 
 ## Performance
+Some cherry-picked examples from chatting with the bot:
 ### 0 Epochs (Before Training)
 Before any training is done, the model likes to communicate mostly with emojis and random letters from the chinese alphabet.
 ```
@@ -56,7 +57,7 @@ yy😤😴🤝kq🙃😐BH😢👍💚♀🤮🤩L😔Z😋·️🥮1j🤷nH😆
 ```
 
 ### 1 Epoch
-Even after **single** training epoch, the results are already impressive. The chatbot has learned to use predominantly English characters and a few emojis here and there. Also notice the random colons, this is an attempt to mimic the structure of the training script with uses colons after 'You' and 'Brian' for every message.
+Even after a **single** training epoch, the results are already impressive. The chatbot has learned to use predominantly English characters and a few emojis here and there. Also notice the random colons, this is an attempt to mimic the structure of the training script with uses colons after 'You' and 'Brian' for every message.
 ```
 You:
 Ok let's try this again! Give it a go buddy 
@@ -145,9 +146,8 @@ https://youtu.be/WviDOCcldyUHK108eh
 
 This is also the epoch where the model learned how to use the f-word in many places. I omitted these examples to keep the README clean haha!
 
-### Epoch 85
+### 85 Epochs
 So after 85 epochs of training, I can somewhat carry on a conversation with the model that spans multiple back-and-forth messages.
-
 ```
 You:
 hey are you free tomorrow morning
@@ -192,4 +192,10 @@ Oh I was wondering with camera =amment is sure what's yourself lol
 ### 100 Epochs
 Here I was starting to notice some overfitting. The model began to "ignore' whatever messages I sent it and spit out mostly manufactured, generic responses. (I'm not including the snippets because the dataset is private.)
 
+## Concluding Thoughts
+Although the model improved quite drastically throughout the training epochs, it still has trouble understanding/speaking English. The model seems to recognize some words from the user input. Also, the model's replies contain bits of relevancy, but not well-constructed sentences like I had hoped.
+
+I believe the **small dataset** is the limiting factor in my model's performance. It can't learn English well enough from just **268 text conversations**. The next step for this project would be to try **transfer learning**. I would pre-train the model on a large text dataset, and then train it on the smaller text message dataset.
+
 ## Acknowledgments
+This project was heavily influenced by the guidance from Tensorflow's [Text Generation Tutorial](https://www.tensorflow.org/text/tutorials/text_generation)
