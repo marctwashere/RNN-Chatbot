@@ -2,7 +2,7 @@
 A text-generation model and chatbot interface to talk to it
 
 ## The Idea
-A couple weeks before I created this repo, my friend Brian sent me an XML export of his entire text message history. Since I do machine learning work, he asked me to make a chatbot of him trained on his text messages.
+A couple weeks before I created this repo, my friend Brian sent me an XML export of his entire text message history. Since he knows I do machine learning work, he asked me to use his messages to train a chatbot that mimics him.
 
 ## Raw Data
 My friend sent me an XML file `text_messages.xml` which contains all SMS and MMS messages sent from and received by his phone. I have not included this file in the repo for privacy reasons, but you if you create your own it should work with all the python scripts. For more information on the export tool used to create the XML, here are some info lines from the file:
@@ -36,9 +36,13 @@ For simplicity's sake, I opted not to use the more performant 'transformer' mode
 - a **dense layer** for outputting a log-probability distribution for the 'next character' in the sequence
 
 ## Training
+- Loss function: Sparse Categorical Cross Entropy
+- Optimizer: Adam
+- Epochs: 100
 
+![graph of training loss vs epochs](training%20loss%20per%20iteration.png)
 ## Performance
-Some cherry-picked examples from chatting with the bot:
+Some cherry-picked examples from my chats with the bot
 ### 0 Epochs (Before Training)
 Before any training is done, the model likes to communicate mostly with emojis and random letters from the chinese alphabet.
 ```
@@ -86,10 +90,7 @@ Brian:
 Gut id on that was week you! Watch are you 😂
 ```
 
-Since the original dataset has a lot of messages setting up meetings/hangouts, I figured I would ask the model `do you want to hang out tonight?`. The response lacks some intelligence, but contains aspects of an appropriate response to this specific question:
-- `How sure you know you hike're cleake come?`  maybe a 'sure' or asking about 'hiking'
-- `at the shorres at N: Pron’s good` appears to be a location confirmation
-- `Dishover Saturday 39 histo/it'l try mis-tomalre!?` a proposed date and the number could possibly be a time/address
+Since the original dataset has a lot of messages setting up meetings/hangouts, I figured I would ask the model `do you want to hang out tonight?`.
 ```
 You:
 do you want to hang out tonight?
@@ -97,6 +98,11 @@ do you want to hang out tonight?
 Brian:
 How sure you know you hike're cleake come? Sure, at the shorres at N: Pron’s good. Dishover Saturday 39 histo/it'l try mis-tomalre!?.
 ```
+
+The response lacks some intelligence, but contains aspects of an appropriate response to this specific question:
+- `How sure you know you hike're cleake come?`  maybe a 'sure' or asking about 'hiking'
+- `at the shorres at N: Pron’s good` appears to be a location confirmation
+- `Dishover Saturday 39 histo/it'l try mis-tomalre!?` a proposed date and the number could possibly be a time/address
 
 ### 50 Epochs
 At this point, the responses seem much more pertinent and coherent to me. I asked the model `how do you like california` and came the sarcastic reply `thanks like we're raining` and some other bits about things being `nice` and `am good`.
@@ -116,18 +122,6 @@ Yep, I interned am good
 
 And I asked the model three times in a row `what is the meaning of life`. Funnily, one of the answers was `looking for Christ, may again tomorrow`.
 ```
-You:
-what is the meaning of life 
-
-Brian:
-I see, what Vary, sorry do you know Thanksgiving next week
-
-You:
-what is the meaning of life
-
-Brian:
-Haha thinking or tomorrow is thinking another tho 😂
-
 You:
 what is the meaning of life
 
@@ -190,7 +184,7 @@ Oh I was wondering with camera =amment is sure what's yourself lol
 ```
 
 ### 100 Epochs
-Here I was starting to notice some overfitting. The model began to "ignore' whatever messages I sent it and spit out mostly manufactured, generic responses. (I'm not including the snippets because the dataset is private.)
+Here I was starting to notice some overfitting. The model began to "ignore' whatever messages I sent it and spit out portions of the dataset as replies. (I'm not including the snippets because the dataset is private.)
 
 ## Concluding Thoughts
 Although the model improved quite drastically throughout the training epochs, it still has trouble understanding/speaking English. The model seems to recognize some words from the user input. Also, the model's replies contain bits of relevancy, but not well-constructed sentences like I had hoped.
